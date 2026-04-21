@@ -27,9 +27,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_openai import OpenAI, ChatOpenAI
-from langchain.prompts import PromptTemplate, ChatPromptTemplate
-from langchain.schema import SystemMessage, HumanMessage, AIMessage
-from langchain.output_parsers import StructuredOutputParser, ResponseSchema
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_community import SystemMessage, HumanMessage, AIMessage
+from langchain_community import StructuredOutputParser, ResponseSchema
 
 
 # ============================================================================
@@ -103,7 +103,7 @@ def example_chat_prompt_template():
     print()
     
     # 另一种方式：使用 MessagesPlaceholder 处理多轮对话
-    from langchain.prompts import MessagesPlaceholder
+    from langchain_core import MessagesPlaceholder
     
     chat_template2 = ChatPromptTemplate.from_messages([
         SystemMessage(content="你是一个友好的助手。"),
