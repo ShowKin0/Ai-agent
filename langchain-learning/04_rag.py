@@ -28,14 +28,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
-from langchain.text_splitter import (
+from langchain_text_splitter import (
     RecursiveCharacterTextSplitter,
     CharacterTextSplitter
 )
-from langchain.vectorstores import Chroma
-from langchain.chains import RetrievalQA
-from langchain.document_loaders import TextLoader, PyPDFLoader
+from langchain_community.vectorstores import Chroma
+from langchain_community.document_loaders import TextLoader, PyPDFLoader
 from langchain.schema import Document
+from langchain.chains import RetrievalQA
 
 
 # ============================================================================

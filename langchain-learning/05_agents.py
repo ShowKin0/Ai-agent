@@ -25,6 +25,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_openai import ChatOpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parser import BaseOutputParser
 from langchain.agents import (
     AgentExecutor,
     create_react_agent,
@@ -32,8 +34,6 @@ from langchain.agents import (
     initialize_agent,
     AgentType
 )
-from langchain.prompts import PromptTemplate
-from langchain.schema import BaseOutputParser
 
 
 # ============================================================================

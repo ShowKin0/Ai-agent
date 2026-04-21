@@ -27,7 +27,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_openai import OpenAI, ChatOpenAI
-from langchain.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain.chains import LLMChain, ConversationChain
 from langchain.memory import (
     ConversationBufferMemory,
@@ -35,7 +36,6 @@ from langchain.memory import (
     ConversationSummaryMemory,
     ConversationBufferMemory
 )
-from langchain.schema import SystemMessage, HumanMessage, AIMessage
 
 
 # ============================================================================
