@@ -27,10 +27,10 @@ load_dotenv()
 from langchain_openai import OpenAI, ChatOpenAI
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain.chains import LLMChain, SimpleSequentialChain, SequentialChain
-from langchain.chains.router import MultiPromptChain
-from langchain.chains.router.llm_router import LLMRouterChain, RouterOutputParser
-from langchain.chains.router.multi_prompt_prompt import MULTI_PROMPT_ROUTER_TEMPLATE
+from langchain_classic.chains import LLMChain, SimpleSequentialChain, SequentialChain
+from langchain_classic.chains import MultiPromptChain
+from langchain_classic.chains import LLMRouterChain, RouterOutputParser
+from langchain_classic.chains import MULTI_PROMPT_ROUTER_TEMPLATE
 
 
 # ============================================================================

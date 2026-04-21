@@ -29,8 +29,8 @@ load_dotenv()
 from langchain_openai import OpenAI, ChatOpenAI
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from langchain.chains import LLMChain, ConversationChain
-from langchain.memory import (
+from langchain_classic.adapters import LLMChain, ConversationChain
+from langchain_classic.adapters import (
     ConversationBufferMemory,
     ConversationBufferWindowMemory,
     ConversationSummaryMemory,

@@ -13,3 +13,4 @@ promptz=promptz_template.format(stock="513180")
 response=Model.stream(promptz)
 for chunk in response:
     print(chunk, end="", flush=True)
+    

@@ -28,8 +28,8 @@ load_dotenv()
 
 from langchain_openai import OpenAI, ChatOpenAI
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
-from langchain_community import SystemMessage, HumanMessage, AIMessage
-from langchain_community import StructuredOutputParser, ResponseSchema
+from langchain_community.agent_toolkits import SystemMessage, HumanMessage, AIMessage
+from langchain_community.agent_toolkits import StructuredOutputParser, ResponseSchema
 
 
 # ============================================================================
