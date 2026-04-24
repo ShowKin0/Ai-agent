@@ -1,206 +1,192 @@
-# LangChain 学习项目
+# LangChain 学习项目（2026 版）
 
-这是一个结构化的 LangChain 学习项目，通过代码实例演示 LangChain 的核心功能与技巧，并附带详细的中文注释和知识点讲解。
+这个目录不再把 LangChain 当成“背 API 名词表”的项目，而是按现在更推荐的写法来组织：
 
-## 项目结构
+- 先学 `Prompt -> Model -> Parser` 的 LCEL / Runnable 思路
+- 再学顺序编排、并行编排、路由
+- 再看“记忆”在新版本里如何落到消息历史和 LangGraph checkpointer
+- 然后进入现代 RAG
+- 最后用 `create_agent` 和工具调用把这些拼起来
 
-```
-langchain-learning/
-├── requirements.txt      # 项目依赖
-├── .env.example         # 环境变量示例
-├── README.md            # 项目说明文档（本文件）
-├── 01_basics.py         # 基础模块：Prompt Templates, LLM, Output Parsers
-├── 02_chains.py         # 链模块：LLMChain, SequentialChain, RouterChain
-├── 03_memory.py         # 记忆模块：BufferMemory, WindowMemory, SummaryMemory
-├── 04_rag.py            # RAG模块：Document Loaders, Splitters, Embeddings, RetrievalQA
-└── 05_agents.py         # 代理与工具：自定义Tool, ReAct Agent
-```
+如果你以前学过旧教程，你会发现这里刻意弱化了不少已经不太推荐的新手入口，比如：
 
-## 安装步骤
+- 到处使用 `LLMChain`
+- 依赖 `initialize_agent(...)`
+- 把 `ConversationBufferMemory` 当成默认方案
+- 继续用 `RetrievalQA` 作为唯一的 RAG 教学入口
 
-### 1. 安装依赖
+这些 API 不是完全不能用，但它们已经不再代表今天最值得先掌握的 LangChain 思维方式。
+
+## 这一版项目重点更新了什么
+
+1. 内容修正为正常中文，去掉原先的乱码。
+2. 示例围绕当前主线 API 重写：
+   - `prompt | model | parser`
+   - `RunnableParallel`
+   - `RunnableBranch`
+   - `RunnableWithMessageHistory`
+   - `create_retrieval_chain`
+   - `create_agent`
+3. 记忆部分强调“新项目优先考虑消息历史或 LangGraph checkpointer”。
+4. RAG 示例改成更贴近当前实践的两段式结构：
+   - 检索器
+   - 文档组合问答链
+5. Agent 示例改成工具调用与结构化输出，而不是旧式字符串解析 ReAct 为主。
+
+## 环境要求
+
+- Python 3.10+
+- 一个可用的 OpenAI API Key
+
+## 安装
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 配置环境变量
-
-复制 `.env.example` 文件为 `.env`，并填入您的 API Key：
+然后复制环境变量模板：
 
 ```bash
 cp .env.example .env
 ```
 
-然后编辑 `.env` 文件，填入您的 OpenAI API Key：
+在 `.env` 中至少填入：
 
 ```env
-OPENAI_API_KEY=your_actual_api_key_here
+OPENAI_API_KEY=your_api_key_here
 ```
 
-## 学习路径
+默认模型建议使用：
 
-建议按照以下顺序学习：
+- `OPENAI_MODEL=gpt-4.1-mini`
+- `OPENAI_EMBEDDING_MODEL=text-embedding-3-small`
 
-### 第一部分：基础模块（01_basics.py）
+如果你的账号已经开通更新的 GPT-5 系列模型，也可以自行切换，但本项目默认保留一个更通用、兼容性更好的设置。
 
-**学习目标：** 掌握 LangChain 的基本概念和组件
+## 目录说明
 
-**核心内容：**
-- PromptTemplate：创建可重用的提示词模板
-- ChatPromptTemplate：针对对话场景的提示词模板
-- LLM 和 ChatModel：大语言模型的直接调用
-- Output Parsers：将模型输出解析为结构化数据
-
-**运行示例：**
-```bash
-python 01_basics.py
+```text
+langchain-learning/
+|-- .env.example
+|-- requirements.txt
+|-- README.md
+|-- 01_basics.py
+|-- 02_chains.py
+|-- 03_memory.py
+|-- 04_rag.py
+`-- 05_agents.py
 ```
 
-**知识点：**
-- SystemMessage vs HumanMessage：不同角色消息的区别
-- 提示词参数化：如何使用占位符动态生成提示词
-- 输出解析：如何将文本输出转换为 JSON 或其他结构化格式
+### [01_basics.py](./01_basics.py)
 
----
+你会学到：
 
-### 第二部分：链模块（02_chains.py）
+- `PromptTemplate` 和 `ChatPromptTemplate`
+- LCEL 的最小闭环
+- `StrOutputParser`
+- `with_structured_output(...)`
 
-**学习目标：** 理解如何将多个组件组合成工作流
+推荐先建立这个基本心智模型：
 
-**核心内容：**
-- LLMChain：基础链，将提示词和模型组合
-- SimpleSequentialChain：顺序执行多个链
-- SequentialChain：更复杂的顺序链，支持多输入输出
-- RouterChain：根据输入动态选择执行路径
-
-**运行示例：**
-```bash
-python 02_chains.py
+```python
+chain = prompt | model | parser
 ```
 
-**知识点：**
-- 链的概念：如何将多个组件（Prompt、LLM、Parser 等）组合起来
-- 输入/输出传递机制：前一个链的输出如何作为后一个链的输入
-- 路由机制：如何根据输入内容的特征选择不同的处理逻辑
+这是今天很多 LangChain 代码的核心句型。
 
----
+### [02_chains.py](./02_chains.py)
 
-### 第三部分：记忆模块（03_memory.py）
+你会学到：
 
-**学习目标：** 掌握如何在对话中保持状态
+- 怎么把多个 runnable 串起来
+- 怎么并行跑多个子任务
+- 怎么做轻量路由
 
-**核心内容：**
-- ConversationBufferMemory：保存完整的对话历史
-- ConversationBufferWindowMemory：只保留最近几轮对话
-- ConversationSummaryMemory：对话历史的摘要记忆
+这里会刻意少讲老式 `SequentialChain`，多讲 LCEL 风格的数据流拼装。
 
-**运行示例：**
-```bash
-python 03_memory.py
-```
+### [03_memory.py](./03_memory.py)
 
-**知识点：**
-- 状态传递机制：Memory 如何保存和传递对话历史
-- 不同 Memory 类型的适用场景：
-  - BufferMemory：适合需要完整历史但对话较短的场景
-  - WindowMemory：适合长对话，只关注最近内容的场景
-  - SummaryMemory：适合长对话，需要保存关键信息的场景
+你会学到：
 
----
+- 为什么“记忆”本质上是状态管理
+- `RunnableWithMessageHistory`
+- `thread_id` / `session_id` 的意义
+- LangGraph checkpointer 如何为 agent 提供短期记忆
 
-### 第四部分：RAG 模块（04_rag.py）
+这部分最重要的认知升级是：
 
-**学习目标：** 理解检索增强生成（RAG）的原理和应用
+> 现代 LangChain 里的 memory，不只是“塞一个 Memory 类”这么简单，而是围绕消息历史和 agent state 来组织。
 
-**核心内容：**
-- Document Loaders：加载文档（文本、PDF 等）
-- Text Splitters：文本分割策略
-- Embeddings 与 Vectorstores：向量化与向量存储
-- RetrievalQA：基于检索的问答链
+### [04_rag.py](./04_rag.py)
 
-**运行示例：**
-```bash
-python 04_rag.py
-```
+你会学到：
 
-**知识点：**
-- RAG 原理：结合外部知识库和 LLM 的能力
-- 向量检索：如何将文本转换为向量，通过相似度搜索找到相关内容
-- 文本分割：将长文档切分成适合模型处理的块
-- Embedding：将文本映射为高维向量，语义相似的文本向量距离近
+- 文档加载
+- 分块策略
+- embedding 与向量检索
+- `create_stuff_documents_chain`
+- `create_retrieval_chain`
 
----
+这部分会把“检索”与“回答”拆开讲清楚，帮助你形成一个更稳定的 RAG 框架感。
 
-### 第五部分：代理与工具（05_agents.py）
+### [05_agents.py](./05_agents.py)
 
-**学习目标：** 学习如何让 AI 自主决策和执行任务
+你会学到：
 
-**核心内容：**
-- 自定义 Tool：创建和使用自定义工具
-- ReAct Agent：使用 ReAct 模式的代理
-- 工具调用机制和步骤追踪
+- `@tool`
+- `create_agent`
+- 工具调用型 agent
+- 结构化输出型 agent
 
-**运行示例：**
-```bash
-python 05_agents.py
-```
+这一节强调的是：
 
-**知识点：**
-- Agent 的概念：使用 LLM 决定采取什么行动的组件
-- Tool（工具）：Agent 可以调用的功能，可以是 Python 函数
-- ReAct 模式：Reasoning + Acting，通过思考-行动循环完成任务
-- 步骤追踪：Agent 如何追踪完成复杂任务的多步操作
+> 现在更常见的是 tool-calling agent，而不是把 ReAct 当成唯一的 agent 入门方式。
 
----
+## 推荐学习顺序
 
-## 注意事项
+1. `python 01_basics.py`
+2. `python 02_chains.py`
+3. `python 03_memory.py`
+4. `python 04_rag.py`
+5. `python 05_agents.py`
 
-1. **API Key 配置**：确保在 `.env` 文件中正确配置了 OpenAI API Key
-2. **网络连接**：部分示例需要访问 OpenAI API，确保网络连接正常
-3. **API 费用**：运行包含 API 调用的示例会产生费用，请注意控制使用量
-4. **LangChain 版本**：本项目基于 LangChain 0.1.0+ 版本，如遇到兼容性问题，请更新依赖
+## 旧写法与新写法速查
 
-## 学习建议
+| 旧思路 | 现在更推荐的思路 |
+|---|---|
+| `LLMChain` | `prompt | model | parser` |
+| `initialize_agent(...)` | `create_agent(...)` |
+| `ConversationBufferMemory` 直接当默认记忆方案 | `RunnableWithMessageHistory` / LangGraph checkpointer |
+| `RetrievalQA` 一把梭 | `retriever + create_stuff_documents_chain + create_retrieval_chain` |
+| `text-embedding-ada-002` | `text-embedding-3-small` / `text-embedding-3-large` |
 
-1. **逐个运行**：建议按照学习路径，逐个运行每个文件，理解每个示例的输出
-2. **阅读注释**：代码中包含详细的中文注释，解释每一行关键代码的作用
-3. **修改实验**：在理解代码的基础上，尝试修改参数或逻辑，观察变化
-4. **实际应用**：结合实际需求，尝试使用所学知识构建简单的应用
+## 学的时候建议重点关注什么
+
+1. 不要只盯着“某个类怎么 import”。
+2. 多观察数据是怎么从上一步流到下一步的。
+3. 多问自己：这个任务到底是“链式编排”“检索增强”还是“agent 决策”。
+4. 先掌握一个清晰、能运行的最小版本，再去追求复杂架构。
 
 ## 常见问题
 
-### Q: 提示 "未找到 OPENAI_API_KEY 环境变量"
+### 1. 没配 `OPENAI_API_KEY`
 
-**A:** 请确保：
-1. 已创建 `.env` 文件
-2. `.env` 文件中包含 `OPENAI_API_KEY=your_key_here`
-3. 代码中正确加载了环境变量（`load_dotenv()`）
+脚本会直接提示并跳过在线调用部分。先把 `.env` 配好。
 
-### Q: API 调用超时或失败
+### 2. 为什么这里默认不用很多旧教程里的类
 
-**A:** 可能的原因：
-1. 网络连接问题
-2. API Key 无效或余额不足
-3. OpenAI 服务暂时不可用
+因为它们对理解历史代码有帮助，但对学习“今天怎么写新项目”帮助有限。
 
-### Q: 某些示例运行很慢
+### 3. 为什么示例尽量短
 
-**A:** 这是正常现象，因为：
-1. 需要调用 OpenAI API，网络请求需要时间
-2. 某些示例涉及多次 API 调用（如 Agent 示例）
-3. 向量化过程可能需要较长时间
+因为学习阶段最容易被“复杂但不必要的胶水代码”淹没。这里保留短小、可读、可迁移的版本。
 
-## 参考资源
+## 参考方向
 
-- [LangChain 官方文档](https://python.langchain.com/)
-- [OpenAI API 文档](https://platform.openai.com/docs)
-- [LangChain GitHub](https://github.com/langchain-ai/langchain)
+建议同时对照：
 
-## 许可证
+- LangChain 官方总览与教程
+- LangChain 的迁移文档
+- OpenAI 官方模型文档
 
-本项目仅用于学习目的。
-
----
-
-**祝学习愉快！**
+本项目的示例风格已按这些较新的资料进行了更新。
